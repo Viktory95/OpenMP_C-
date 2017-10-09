@@ -11,11 +11,14 @@ using namespace std;
 
 int main()
 {
-	PointsDownWithParallel* withParallel = new PointsDownWithParallel();
-	withParallel->run();	
-	cout << "\n";
+
 	PointsDownWithoutParallel* withoutParallel = new PointsDownWithoutParallel();
 	withoutParallel->run();
+
+	cout << "\n";
+
+	PointsDownWithParallel* withParallel = new PointsDownWithParallel();
+	withParallel->run();	
 
 	system("pause");
 	return 0;

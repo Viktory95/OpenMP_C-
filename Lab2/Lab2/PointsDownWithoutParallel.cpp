@@ -57,21 +57,24 @@ void descent_method(func_ptr f, double* vars, double eps, int max_steps_count)
 	bool was_counted = false;
 	int stpes_ellapsed = 0;
 	double delta = 0.0;
+	int flag = 1;
 	for (int i = 0; i < max_steps_count; i++){
-		A = B;
+		if (flag == 1){
+			A = B;
 
-		for (int var_index = 0; var_index < var_count; var_index++)
-			vars[var_index] = golden_section(f, vars, var_index, eps, -5000, 5000, max_steps_count);
+			for (int var_index = 0; var_index < var_count; var_index++)
+				vars[var_index] = golden_section(f, vars, var_index, eps, -5000, 5000, max_steps_count);
 
-		B = f(vars);
+			B = f(vars);
 
-		delta = fabs(A - B);
+			delta = fabs(A - B);
 
-		if (delta <= eps)
-		{
-			stpes_ellapsed = i + 1;
-			was_counted = true;
-			break;
+			if (delta <= eps)
+			{
+				stpes_ellapsed = i + 1;
+				was_counted = true;
+				flag *= 0;
+			}
 		}
 	}
 
@@ -99,11 +102,14 @@ double golden_section(func_ptr f, double* vars, int var_index, double eps, doubl
 	double res = 0.0;
 	double phi = (1 + sqrt(5.0)) / 2.0;
 	double A = 0.0f, B = 0.0f;
-	double x1 = a + phi * (b - a), x2 = b - phi * (b - a);
+	double x1, x2, flag = true;
+
+	x1 = a + phi * (b - a);
+	x2 = b - phi * (b - a);
 
 	int step = 0;
 
-	while ((b - a > eps))
+	while (flag)
 	{
 		x1 = b - ((b - a) / phi);
 		vars[var_index] = x1;
@@ -115,6 +121,8 @@ double golden_section(func_ptr f, double* vars, int var_index, double eps, doubl
 			a = x1;
 		else
 			b = x2;
+
+		flag = b - a > eps;
 
 		step++;
 		if (step > max_steps_count)

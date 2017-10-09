@@ -54,26 +54,33 @@ double function_par(double* variables)
 
 void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_count)
 {
+	omp_set_nested(true);
+
 	double B = f(vars), A = 0;
 	bool was_counted = false;
 	int stpes_ellapsed = 0;
 	double delta = 0.0;
+
 	for (int i = 0; i < max_steps_count; i++){
-		A = B;
+			A = B;
 
-		for (int var_index = 0; var_index < var_count_par; var_index++)
-			vars[var_index] = golden_section_par(f, vars, var_index, eps, -5000, 5000, max_steps_count);
+			for (int var_index = 0; var_index < var_count_par; var_index++)
+				vars[var_index] = golden_section_par(f, vars, var_index, eps, -5000, 5000, max_steps_count);
 
-		B = f(vars);
 
-		delta = fabs(A - B);
+			B = f(vars);
 
-		if (delta <= eps)
-		{
-			stpes_ellapsed = i + 1;
-			was_counted = true;
-			break;
-		}
+			delta = fabs(A - B);
+
+				if (delta <= eps)
+				{
+#pragma omp parallel
+					{
+						stpes_ellapsed = i + 1;
+						was_counted = true;
+					}
+					break;
+				}
 	}
 
 	std::cout << "Результат поиска минимума функции " << "exp(x1 + x2 + x3) / (x1 * x2^2 * x3^3)" << std::endl;
@@ -97,27 +104,44 @@ void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_coun
 
 double golden_section_par(func_ptr f, double* vars, int var_index, double eps, double a, double b, int max_steps_count)
 {
+
 	double res = 0.0;
 	double phi = (1 + sqrt(5.0)) / 2.0;
 	double A = 0.0f, B = 0.0f;
-	double x1 = a + phi * (b - a), x2 = b - phi * (b - a);
+	double x1, x2, flag = true;
+#pragma omp parallel
+	{
+		x1 = a + phi * (b - a);
+		x2 = b - phi * (b - a);
+	}
 
 	int step = 0;
 
-	while ((b - a > eps))
+	while (flag)
 	{
-		x1 = b - ((b - a) / phi);
-		vars[var_index] = x1;
-		A = f(vars);
-		x2 = a + ((b - a) / phi);
+			x1 = b - ((b - a) / phi);
+			vars[var_index] = x1;
+#pragma omp parallel
+		{
+			A = f(vars);
+			x2 = a + ((b - a) / phi);
+		}
 		vars[var_index] = x2;
-		B = f(vars);
-		if (A > B)
-			a = x1;
-		else
-			b = x2;
 
+#pragma omp parallel
+		{
+			B = f(vars);
+#pragma omp critical
+			{
+				if (A > B)
+					a = x1;
+				else
+					b = x2;
+			}
+			flag = b - a > eps;
+		}
 		step++;
+		
 		if (step > max_steps_count)
 			break;
 	}
