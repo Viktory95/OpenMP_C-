@@ -1,0 +1,75 @@
+Parallel type - Without parallel, rows
+ Schedule = 1 (Main thred)
+ Work time = 101.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, rows
+ Schedule = 1
+ Work time = 57.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, rows
+ Schedule = 5
+ Work time = 81.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, rows
+ Schedule = 15
+ Work time = 74.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, rows
+ Schedule = 25
+ Work time = 42.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - Without parallel, columns
+ Schedule = 1 (Main thred)
+ Work time = 320.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, columns
+ Schedule = 1
+ Work time = 1157.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, columns
+ Schedule = 5
+ Work time = 389.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, columns
+ Schedule = 15
+ Work time = 212.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, columns
+ Schedule = 25
+ Work time = 218.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - Without parallel, blocks
+ Schedule = 1 (Main thred)
+ Work time = 133.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, blocks
+ Schedule = 1
+ Work time = 389.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, blocks
+ Schedule = 5
+ Work time = 149.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, blocks
+ Schedule = 15
+ Work time = 220.000000 millisecons
+ Work result: 
+---------------------------------------------
+Parallel type - With parallel, blocks
+ Schedule = 25
+ Work time = 114.000000 millisecons
+ Work result: 
+---------------------------------------------
