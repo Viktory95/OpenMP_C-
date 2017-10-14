@@ -48,8 +48,8 @@ void PointsDownWithParallel::run()
 
 double function_par(double* variables)
 {
-
-	return (pow(variables[0], 2) + pow((variables[1] - 50), 2) + pow((variables[2] + 30), 2)) - 100;
+	return (pow(variables[0], 2) + pow((variables[1] - 50), 2) + pow((variables[2] + 30), 2)) - 100 * sin(variables[0]);
+	//(x1^2+(x2-50)^2+(x3+30)^2)-100*sin(x1)
 }
 
 void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_count)
@@ -60,30 +60,33 @@ void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_coun
 	bool was_counted = false;
 	int stpes_ellapsed = 0;
 	double delta = 0.0;
+	bool flag = true;
+#pragma omp for ordered 
+		for (int i = 0; i < max_steps_count; i++){
+			if (flag){
+				A = B;
 
-	for (int i = 0; i < max_steps_count; i++){
-			A = B;
+#pragma omp ordered 
+				{
+					for (int var_index = 0; var_index < var_count_par; var_index++)
+						vars[var_index] = golden_section_par(f, vars, var_index, eps, -5000, 5000, max_steps_count);
+				}
 
-			for (int var_index = 0; var_index < var_count_par; var_index++)
-				vars[var_index] = golden_section_par(f, vars, var_index, eps, -5000, 5000, max_steps_count);
+				B = f(vars);
 
-
-			B = f(vars);
-
-			delta = fabs(A - B);
+				delta = fabs(A - B);
 
 				if (delta <= eps)
 				{
-#pragma omp parallel
-					{
-						stpes_ellapsed = i + 1;
-						was_counted = true;
-					}
-					break;
+					stpes_ellapsed = i + 1;
+					was_counted = true;
+					flag = false;
 				}
-	}
+			}
+		}
+	
 
-	std::cout << "Результат поиска минимума функции " << "exp(x1 + x2 + x3) / (x1 * x2^2 * x3^3)" << std::endl;
+	std::cout << "Результат поиска минимума функции " << "(x1^2+(x2-50)^2+(x3+30)^2)-100*sin(x1)" << std::endl;
 
 	if (!was_counted)
 		std::cout << "За максимально указанное количество шагов ( " << max_steps_count << " ) минимум не был посчитан." << std::endl;
@@ -109,11 +112,11 @@ double golden_section_par(func_ptr f, double* vars, int var_index, double eps, d
 	double phi = (1 + sqrt(5.0)) / 2.0;
 	double A = 0.0f, B = 0.0f;
 	double x1, x2, flag = true;
-#pragma omp parallel
-	{
+//#pragma omp parallel
+	//{
 		x1 = a + phi * (b - a);
 		x2 = b - phi * (b - a);
-	}
+	//}
 
 	int step = 0;
 
@@ -121,25 +124,25 @@ double golden_section_par(func_ptr f, double* vars, int var_index, double eps, d
 	{
 			x1 = b - ((b - a) / phi);
 			vars[var_index] = x1;
-#pragma omp parallel
-		{
+//#pragma omp parallel
+	//	{
 			A = f(vars);
 			x2 = a + ((b - a) / phi);
-		}
+	//	}
 		vars[var_index] = x2;
 
-#pragma omp parallel
-		{
+//#pragma omp parallel
+	//	{
 			B = f(vars);
-#pragma omp critical
-			{
+//#pragma omp critical
+	//		{
 				if (A > B)
 					a = x1;
 				else
 					b = x2;
-			}
+		//	}
 			flag = b - a > eps;
-		}
+		//}
 		step++;
 		
 		if (step > max_steps_count)

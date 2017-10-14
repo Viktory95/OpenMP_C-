@@ -48,7 +48,7 @@ void PointsDownWithoutParallel::run()
 double function(double* variables)
 {
 
-	return (pow(variables[0], 2) + pow((variables[1] - 50), 2) + pow((variables[2] + 30), 2)) - 100;
+	return (pow(variables[0], 2) + pow((variables[1] - 50), 2) + pow((variables[2] + 30), 2)) - 100 * sin(variables[0]);
 }
 
 void descent_method(func_ptr f, double* vars, double eps, int max_steps_count)
@@ -57,9 +57,9 @@ void descent_method(func_ptr f, double* vars, double eps, int max_steps_count)
 	bool was_counted = false;
 	int stpes_ellapsed = 0;
 	double delta = 0.0;
-	int flag = 1;
+	bool flag = true;
 	for (int i = 0; i < max_steps_count; i++){
-		if (flag == 1){
+		if (flag){
 			A = B;
 
 			for (int var_index = 0; var_index < var_count; var_index++)
@@ -73,12 +73,12 @@ void descent_method(func_ptr f, double* vars, double eps, int max_steps_count)
 			{
 				stpes_ellapsed = i + 1;
 				was_counted = true;
-				flag *= 0;
+				flag = false;
 			}
 		}
 	}
 
-	std::cout << "Результат поиска минимума функции " << "exp(x1 + x2 + x3) / (x1 * x2^2 * x3^3)" << std::endl;
+	std::cout << "Результат поиска минимума функции " << "(x1^2+(x2-50)^2+(x3+30)^2)-100*sin(x1)" << std::endl;
 
 	if (!was_counted)
 		std::cout << "За максимально указанное количество шагов ( " << max_steps_count << " ) минимум не был посчитан." << std::endl;
