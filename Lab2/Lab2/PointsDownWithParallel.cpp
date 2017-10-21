@@ -48,29 +48,52 @@ void PointsDownWithParallel::run()
 
 double function_par(double* variables)
 {
-	return (pow(variables[0], 2) + pow((variables[1] - 50), 2) + pow((variables[2] + 30), 2)) - 100 * sin(variables[0]);
+	double v1, v2, v3, v4;
+	omp_set_num_threads(4);
+#pragma omp parallel
+	{
+#pragma omp sections  
+				{
+#pragma omp section  
+					{
+						v1 = pow(variables[0], 2);
+					}
+
+#pragma omp section  
+					{
+						v2 = pow((variables[1] - 50), 2);
+					}
+#pragma omp section  
+					{
+						v3 = pow((variables[2] + 30), 2);
+					}
+#pragma omp section  
+					{
+						v4 = sin(variables[0]);
+					}
+				}
+	}
+	return (v1 + v2 + v3) - 100 * v4;
 	//(x1^2+(x2-50)^2+(x3+30)^2)-100*sin(x1)
 }
 
 void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_count)
 {
-	omp_set_nested(true);
 
 	double B = f(vars), A = 0;
 	bool was_counted = false;
 	int stpes_ellapsed = 0;
 	double delta = 0.0;
 	bool flag = true;
-#pragma omp for ordered 
+//#pragma omp for ordered 
 		for (int i = 0; i < max_steps_count; i++){
 			if (flag){
 				A = B;
 
-#pragma omp ordered 
-				{
+//#pragma omp ordered 
+	//			{
 					for (int var_index = 0; var_index < var_count_par; var_index++)
 						vars[var_index] = golden_section_par(f, vars, var_index, eps, -5000, 5000, max_steps_count);
-				}
 
 				B = f(vars);
 
@@ -82,6 +105,7 @@ void descent_method_par(func_ptr f, double* vars, double eps, int max_steps_coun
 					was_counted = true;
 					flag = false;
 				}
+		//		}
 			}
 		}
 	
@@ -112,38 +136,40 @@ double golden_section_par(func_ptr f, double* vars, int var_index, double eps, d
 	double phi = (1 + sqrt(5.0)) / 2.0;
 	double A = 0.0f, B = 0.0f;
 	double x1, x2, flag = true;
-//#pragma omp parallel
-	//{
-		x1 = a + phi * (b - a);
-		x2 = b - phi * (b - a);
-	//}
+	x1 = a + phi * (b - a);
+	x2 = b - phi * (b - a);
 
 	int step = 0;
 
 	while (flag)
 	{
-			x1 = b - ((b - a) / phi);
-			vars[var_index] = x1;
-//#pragma omp parallel
-	//	{
-			A = f(vars);
-			x2 = a + ((b - a) / phi);
-	//	}
-		vars[var_index] = x2;
+		omp_set_num_threads(2);
+#pragma omp parallel
+		{
+#pragma omp sections  
+				{
+#pragma omp section  
+					{
+						x1 = b - ((b - a) / phi);
+						vars[var_index] = x1;
+						A = f(vars);
+					}
 
-//#pragma omp parallel
-	//	{
-			B = f(vars);
-//#pragma omp critical
-	//		{
-				if (A > B)
-					a = x1;
-				else
-					b = x2;
-		//	}
-			flag = b - a > eps;
-		//}
-		step++;
+#pragma omp section  
+					{
+						x2 = a + ((b - a) / phi);
+						vars[var_index] = x2;
+						B = f(vars);
+					}
+				}
+		}
+		if (A > B)
+			a = x1;
+		else
+			b = x2;
+		flag = b - a > eps;
+				step++;
+			
 		
 		if (step > max_steps_count)
 			break;
